@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIOCLOCK — 생체 대사 시뮬레이터</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="dashboard-container">
+        
+        <header class="dashboard-header">
+            <h1 class="brand-logo" style="text-transform: uppercase; letter-spacing: 0.05em;">BIOCLOCK</h1>
+            <p class="subtitle">실시간 행동 변수와 신체 프로필을 기반으로 한<br>개인 맞춤형 호르몬 기상도 예측 엔진</p>
+        </header>
+
+        <section id="auth-section" class="auth-box">
+            <h2 id="auth-title" class="section-title">BIOCLOCK 로그인</h2>
+            
+            <div class="auth-input-group">
+                <input type="email" id="auth-email" placeholder="이메일 주소 (아이디)" />
+                <input type="password" id="auth-password" placeholder="비밀번호" />
+                <input type="password" id="auth-password-confirm" placeholder="비밀번호 확인" class="hidden" />
+            </div>
+
+            <div class="auth-btn-group" style="flex-direction: column; gap: 10px;">
+                <button id="main-submit-btn" class="apple-btn solid">로그인</button>
+                <button id="switch-mode-btn" class="apple-btn border" style="font-size: 13px; color: #86868b;">아직 계정이 없으신가요? 회원가입</button>
+            </div>
+
+            <div id="forgot-password-wrapper" style="text-align: center; margin-top: 14px;">
+                <button id="forgot-password-btn" class="apple-btn text" style="font-size: 12px; color: #86868b; padding: 0;">비밀번호를 잊으셨나요?</button>
+            </div>
+
+            <button id="logout-btn" class="apple-btn text hidden">로그아웃</button>
+            <p id="auth-status-text" class="status-message"></p>
+        </section>
+
+        <section id="main-app-section" class="input-form-section hidden">
+            
+            <div id="profile-summary-box" class="profile-summary">
+                <div class="summary-text">
+                    <span id="summary-display">정보를 불러오는 중...</span>
+                </div>
+                <button id="edit-profile-toggle-btn" class="mini-edit-btn">내 정보 수정</button>
+            </div>
+
+            <div id="personal-data-sliders" class="personal-data-group hidden">
+                <div class="slider-wrapper">
+                    <div class="slider-header">
+                        <span class="form-label">나이</span>
+                        <span class="slider-value-display"><b id="age-val">28</b> 세</span>
+                    </div>
+                    <input type="range" id="user-age" min="1" max="116" value="28" class="apple-slider" />
+                </div>
+
+                <div class="slider-wrapper">
+                    <div class="slider-header">
+                        <span class="form-label">신장 (키)</span>
+                        <span class="slider-value-display"><b id="height-val">175</b> cm</span>
+                    </div>
+                    <input type="range" id="user-height" min="100" max="210" value="175" class="apple-slider" />
+                </div>
+
+                <div class="slider-wrapper">
+                    <div class="slider-header">
+                        <span class="form-label">체중 (몸무게)</span>
+                        <span class="slider-value-display"><b id="weight-val">70</b> kg</span>
+                    </div>
+                    <input type="range" id="user-weight" min="30" max="130" value="70" class="apple-slider" />
+                </div>
+
+                <div class="slider-wrapper">
+                    <label for="user-job" class="form-label">직무 환경</label>
+                    <div class="select-capsule-wrapper">
+                        <select id="user-job" class="apple-select">
+                            <option value="desk" selected>좌식 업무 (사무직)</option>
+                            <option value="active">활동성 업무 (현장직)</option>
+                            <option value="heavy">고강도 육체노동</option>
+                            <option value="irregular">교대 근무 / 불규칙 리듬</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="save-profile-btn" class="apple-btn solid" style="margin-top: 5px; background: #34c759; color: #fff;">수정 완료</button>
+            </div>
+
+            <div class="form-group" style="position: relative; margin-top: 24px;">
+                <label class="form-label">전날 취침 시간</label>
+                <div id="sleep-time-trigger" class="time-input">오후 10:00</div>
+                <div id="sleep-time-picker" class="custom-picker-box hidden">
+                    <div class="picker-blur-top"></div><div class="picker-blur-bottom"></div>
+                    <div class="picker-column" id="sleep-hour-column"></div>
+                    <div class="picker-column" id="sleep-minute-column"></div>
+                </div>
+            </div>
+
+            <div class="form-group" style="position: relative;">
+                <label class="form-label">당일 기상 시간</label>
+                <div id="wake-time-trigger" class="time-input">오전 07:00</div>
+                <div id="wake-time-picker" class="custom-picker-box hidden">
+                    <div class="picker-blur-top"></div><div class="picker-blur-bottom"></div>
+                    <div class="picker-column" id="wake-hour-column"></div>
+                    <div class="picker-column" id="wake-minute-column"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">수면 만족도 (수면의 질)</label>
+                <div class="radio-group row-layout">
+                    <div class="radio-card active" data-name="sleep-quality" data-value="꿀잠">🌙 꿀잠</div>
+                    <div class="radio-card" data-name="sleep-quality" data-value="보통">😐 보통</div>
+                    <div class="radio-card" data-name="sleep-quality" data-value="잘못잠">🥱 잘못잠</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">현재 신체 상태 및 행동 변수</label>
+                <div class="radio-group vertical-layout">
+                    <div class="radio-card active" data-name="vibe" data-value="vibe1">
+                        <span class="option-title">일반적인 식사 / 정상 리듬</span>
+                        <span class="option-desc">과식이나 공복 없이 한식·일반식 섭취 및 안정적인 신체 유지</span>
+                    </div>
+                    <div class="radio-card" data-name="vibe" data-value="vibe2">
+                        <span class="option-title">공복 고카페인 섭취</span>
+                        <span class="option-desc">빈속에 고함량 에스프레소 및 아메리카노 과다 수급</span>
+                    </div>
+                    <div class="radio-card" data-name="vibe" data-value="vibe3">
+                        <span class="option-title">고당질 / 정제 탄수화물 섭취</span>
+                        <span class="option-desc">액상과당, 디저트, 빵류 등 정제당 급격한 공급</span>
+                    </div>
+                    
+                    <div class="radio-card" data-name="vibe" data-value="vibe4">
+                        <span class="option-title">수면 박탈 / 공복 관성 지연</span>
+                        <span class="option-desc">장시간 공복 배고픔 및 수면 부족, 기상 알람 무한 연타 상태</span>
+                    </div>
+                    
+                    <div class="radio-card" data-name="vibe" data-value="vibe5">
+                        <span class="option-title">고강도 초기 대사 활성화</span>
+                        <span class="option-desc">기상 직후 공복 러닝, 인터벌, 고강도 웨이트 트레이닝 수행</span>
+                    </div>
+                    <div class="radio-card" data-name="vibe" data-value="vibe6">
+                        <span class="option-title">기타 사용자 직접 입력</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="custom-input-wrapper" class="form-group hidden">
+                <input type="text" id="custom-input" placeholder="특이 사항을 입력하세요." />
+            </div>
+
+            <button id="analyze-btn" class="apple-btn solid" style="background:#f5f5f7; color:#000;">대사 예측 엔진 실행</button>
+
+        </section>
+
+        <section id="result-container" class="result-section"></section>
+
+    </main>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
