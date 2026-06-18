@@ -347,7 +347,11 @@ async function generateReport() {
         const aiData = JSON.parse(aiResponseText);
         let timelineRows = ""; 
         aiData.timeline.forEach(row => { 
-            timelineRows += `<tr><td><strong>${row.time}</strong></td><td>${row.title}</td><td>${row.desc}</td></tr>`; 
+        timelineRows += `<tr>
+            <td data-label="예측 시간"><strong>${row.time}</strong></td>
+            <td data-label="기상 궤도">${row.title}</td>
+            <td data-label="AI 가이드">${row.desc}</td>
+        </tr>`;
         });
 
         resultContainer.innerHTML = `<div class="report-card"><div style="text-align: center; margin-bottom: 25px;"><div style="font-size: 11px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.1em;">Today's Bio-Score</div><div style="font-size: 54px; font-weight: 700; color: ${aiData.scoreColor}; margin: 5px 0;">${aiData.score}<span style="font-size: 20px; color: var(--text-sub);">점</span></div><div style="font-size: 13px; color: var(--text-main);">현재 대사 리듬 지표는 <span style="color: ${aiData.scoreColor}; font-weight: 700;">[${aiData.status}]</span> 상태입니다.</div></div><table class="report-table"><thead><tr><th>예측 시간</th><th>기상 궤도</th><th>AI 정밀 가이드라인</th></tr></thead><tbody>${timelineRows}</tbody></table><div style="margin-top: 20px; padding: 14px; background: rgba(56, 189, 248, 0.05); border: 1px dashed rgba(56, 189, 248, 0.3); border-radius: 12px; font-size: 12px; line-height: 1.5;"><span style="color: #00f0ff; font-weight: 700;">🛒 AI 맞춤 솔루션 제안:</span><br>${aiData.prescription}</div></div>`;

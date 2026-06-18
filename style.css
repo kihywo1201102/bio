@@ -200,3 +200,36 @@ input:focus { border-color: var(--neon-cyan); box-shadow: 0 0 8px rgba(0, 240, 2
 
 .report-table th:nth-child(1), .report-table td:nth-child(1) { width: 90px; }
 .report-table th:nth-child(2), .report-table td:nth-child(2) { width: 110px; }
+
+
+
+@media screen and (max-width: 600px) {
+    .report-table thead { display: none; }
+    
+    .report-table, .report-table tbody, .report-table tr, .report-table td {
+        display: block;
+        width: 100%;
+    }
+    
+    .report-table tr {
+        margin-bottom: 15px;
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        padding: 10px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.03);
+    }
+    
+    .report-table td {
+        text-align: left;
+        padding: 5px 0;
+        font-size: 13px;
+    }
+    
+    .report-table td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: block;
+        color: var(--accent-color);
+        margin-bottom: 2px;
+    }
+}
