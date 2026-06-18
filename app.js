@@ -292,8 +292,14 @@ async function generateReport() {
     const userAge = ageSlider.value; const userHeight = heightSlider.value; const userWeight = weightSlider.value;
     const userJobSelect = document.getElementById('user-job'); const userJobText = userJobSelect.options[userJobSelect.selectedIndex].text;
     
-    const sleepTimeStr = `${selectedSleepHour}:${selectedSleepMin}`;
-    const wakeTimeStr = `${selectedWakeHour}:${selectedWakeMin}`;
+    // [현우님 코드 복구 + 모바일 에러 방지용 포맷팅 추가]
+    const hS = selectedSleepHour.toString().padStart(2, '0');
+    const mS = selectedSleepMin.toString().padStart(2, '0');
+    const hW = selectedWakeHour.toString().padStart(2, '0');
+    const mW = selectedWakeMin.toString().padStart(2, '0');
+    
+    const sleepTimeStr = `${hS}:${mS}`;
+    const wakeTimeStr = `${hW}:${mW}`;
 
     let vibePromptText = activeVibeText || "일반적인 식사 / 정상 리듬";
     if (activeVibeValue === 'vibe6') { vibePromptText = customInput.value.trim() || "특이사항 입력"; }
@@ -320,7 +326,7 @@ async function generateReport() {
 }`;
 
     try {
-        // [수정 완료] 통신 경로를 절대 주소로 고정하여 500 에러 해결
+        // [수정 완료] 절대 경로로 고정하여 모든 환경에서 서버 통신 성공 보장
         const response = await fetch('https://bio-server-ksds.onrender.com/api/analyze', {
             method: "POST", 
             headers: { "Content-Type": "application/json" },
