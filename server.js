@@ -1,14 +1,25 @@
-import 'dotenv/config'; // 👈 추가된 디테일: 비밀 금고(.env)를 열어주는 마스터키
 import express from 'express';
 import { GoogleGenAI } from '@google/genai';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const app = express();
-const PORT = 3000;
+// 렌더에서는 환경변수가 바로 시스템에 적용되므로 dotenv import를 제거하거나 
+// 환경에 따라 안전하게 처리합니다.
+import 'dotenv/config'; 
 
-// 🔒 하드코딩된 키를 지우고, 안전하게 환경 변수에서 꺼내오도록 수정했습니다!
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const app = express();
+// 렌더는 포트번호를 자동으로 할당하므로 process.env.PORT를 우선 사용합니다.
+const PORT = process.env.PORT || 3000;
+
+// 1. 키를 불러올 때 로그를 남겨 서버가 키를 찾았는지 눈으로 확인합니다.
+const apiKey = process.env.GEMINI_API_KEY;
+console.log("확인: 환경 변수 GEMINI_API_KEY 존재 여부 👉", !!apiKey);
+
+if (!apiKey) {
+    console.error("🚨 치명적 에러: GEMINI_API_KEY가 설정되지 않았습니다!");
+}
+
+const ai = new GoogleGenAI({ apiKey: apiKey });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,12 +27,10 @@ const __dirname = path.dirname(__filename);
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// 🔄 app.js와 구글 제미나이 서버를 잇는 안전한 파이프라인
 app.post('/api/analyze', async (req, res) => {
     try {
         const { prompt } = req.body;
         
-        // 최신형 규격인 gemini-2.5-flash 모델 가동
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: prompt,
@@ -30,6 +39,7 @@ app.post('/api/analyze', async (req, res) => {
         res.json({ text: response.text });
     } catch (error) {
         console.error("서버 내부 연산 중 에러 발생:", error);
+        // 에러를 클라이언트에게도 자세히 보냅니다.
         res.status(500).json({ error: error.message });
     }
 });
