@@ -281,7 +281,6 @@ wakeTimeTrigger.addEventListener('click', (e) => {
 
 document.addEventListener('click', () => { sleepTimePickerBox.classList.add('hidden'); wakeTimePickerBox.classList.add('hidden'); });
 
-// 🔒 [보안 수리 완료] 시스템 마비를 일으켰던 공백 함수 영역을 안전하게 복원해 로그인을 정상화했습니다.
 function startCrashTimer(targetHour, targetMin) { return; }
 
 if(analyzeBtn) analyzeBtn.addEventListener('click', () => { generateReport(); });
@@ -321,11 +320,10 @@ async function generateReport() {
 }`;
 
     try {
-        const response = await fetch('/api/analyze', {
+        // [수정 완료] 통신 경로를 절대 주소로 고정하여 500 에러 해결
+        const response = await fetch('https://bio-server-ksds.onrender.com/api/analyze', {
             method: "POST", 
-            headers: { 
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ prompt: prompt })
         });
         
@@ -346,7 +344,6 @@ async function generateReport() {
             timelineRows += `<tr><td><strong>${row.time}</strong></td><td>${row.title}</td><td>${row.desc}</td></tr>`; 
         });
 
-        
         resultContainer.innerHTML = `<div class="report-card"><div style="text-align: center; margin-bottom: 25px;"><div style="font-size: 11px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.1em;">Today's Bio-Score</div><div style="font-size: 54px; font-weight: 700; color: ${aiData.scoreColor}; margin: 5px 0;">${aiData.score}<span style="font-size: 20px; color: var(--text-sub);">점</span></div><div style="font-size: 13px; color: var(--text-main);">현재 대사 리듬 지표는 <span style="color: ${aiData.scoreColor}; font-weight: 700;">[${aiData.status}]</span> 상태입니다.</div></div><table class="report-table"><thead><tr><th>예측 시간</th><th>기상 궤도</th><th>AI 정밀 가이드라인</th></tr></thead><tbody>${timelineRows}</tbody></table><div style="margin-top: 20px; padding: 14px; background: rgba(56, 189, 248, 0.05); border: 1px dashed rgba(56, 189, 248, 0.3); border-radius: 12px; font-size: 12px; line-height: 1.5;"><span style="color: #00f0ff; font-weight: 700;">🛒 AI 맞춤 솔루션 제안:</span><br>${aiData.prescription}</div></div>`;
     } catch (error) {
         console.error("AI 엔진 마스터 디버깅 에러:", error);
