@@ -304,8 +304,31 @@ async function generateReport() {
     let vibePromptText = activeVibeText || "일반적인 식사 / 정상 리듬";
     if (activeVibeValue === 'vibe6') { vibePromptText = customInput.value.trim() || "특이사항 입력"; }
 
-    resultContainer.innerHTML = `<div class="report-card" style="text-align: center; padding: 40px 20px;"><div style="font-size: 24px; animation: spin 2s linear infinite; margin-bottom: 15px;">⚙️</div><p style="color: var(--accent-color); font-weight: 600; font-size: 15px;">BIOCLOCK AI ENGINE</p><p style="color: var(--text-sub); font-size: 13px; margin-top: 5px;">바이오클락 생체 리듬 연산 시스템을 가동 중입니다...</p></div>`;
+    // --- [1. 화려한 로딩 UI 그리기] ---
+    resultContainer.innerHTML = `
+    <div class="report-card" style="text-align: center; padding: 40px 20px;">
+        <div style="font-size: 24px; animation: spin 2s linear infinite;">⚙️</div>
+        <div class="loading-percent-text" id="loading-percent">0%</div>
+        <p style="color: var(--text-sub); font-size: 13px;">바이오클락 생체 리듬 연산 시스템 가동 중...</p>
+        <div class="loading-bar-container">
+            <div class="loading-bar-fill" id="loading-fill"></div>
+        </div>
+    </div>`;
     resultContainer.scrollIntoView({ behavior: 'smooth' });
+
+    // --- [2. 0~94% 페이크 로딩 숫자 올라가는 애니메이션] ---
+    const percentText = document.getElementById('loading-percent');
+    const fillBar = document.getElementById('loading-fill');
+    let currentPercent = 0;
+    
+    const loadingInterval = setInterval(() => {
+        if (currentPercent < 94) {
+            currentPercent += Math.floor(Math.random() * 8) + 2; // 랜덤하게 숫자가 훅훅 오름
+            if(currentPercent > 94) currentPercent = 94;
+            percentText.innerText = currentPercent + "%";
+            fillBar.style.width = currentPercent + "%";
+        }
+    }, 150);
 
     const prompt = `너는 생체 시계 및 호르몬 대사 전문가 'BIOCLOCK AI' 엔진이다. 유저 정보를 기반으로 오늘의 생체 점수와 리포트를 반환하라. 다른 어떤 설명글도 절대 붙이지 말고 오직 중괄호로 시작해 중괄호로 끝나는 순수한 JSON 데이터 덩어리 하나만 반환해야 한다.
 
@@ -326,7 +349,6 @@ async function generateReport() {
 }`;
 
     try {
-        // [수정 완료] 절대 경로로 고정하여 모든 환경에서 서버 통신 성공 보장
         const response = await fetch('https://bio-server-ksds.onrender.com/api/analyze', {
             method: "POST", 
             headers: { "Content-Type": "application/json" },
@@ -337,6 +359,12 @@ async function generateReport() {
             throw new Error(`서버 통신 장애 (상태코드: ${response.status})`);
         }
         
+        // --- [3. 서버 응답 완료! 100% 꽉 채우고 결과 보여주기] ---
+        clearInterval(loadingInterval);
+        percentText.innerText = "100%";
+        fillBar.style.width = "100%";
+        await new Promise(resolve => setTimeout(resolve, 400)); // 100% 찼을 때 타격감을 위해 0.4초 뜸 들이기
+
         const serverData = await response.json();
         let aiResponseText = serverData.text.trim();
         
@@ -356,6 +384,7 @@ async function generateReport() {
 
         resultContainer.innerHTML = `<div class="report-card"><div style="text-align: center; margin-bottom: 25px;"><div style="font-size: 11px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.1em;">Today's Bio-Score</div><div style="font-size: 54px; font-weight: 700; color: ${aiData.scoreColor}; margin: 5px 0;">${aiData.score}<span style="font-size: 20px; color: var(--text-sub);">점</span></div><div style="font-size: 13px; color: var(--text-main);">현재 대사 리듬 지표는 <span style="color: ${aiData.scoreColor}; font-weight: 700;">[${aiData.status}]</span> 상태입니다.</div></div><table class="report-table"><thead><tr><th>예측 시간</th><th>기상 궤도</th><th>AI 정밀 가이드라인</th></tr></thead><tbody>${timelineRows}</tbody></table><div style="margin-top: 20px; padding: 14px; background: rgba(56, 189, 248, 0.05); border: 1px dashed rgba(56, 189, 248, 0.3); border-radius: 12px; font-size: 12px; line-height: 1.5;"><span style="color: #00f0ff; font-weight: 700;">🛒 AI 맞춤 솔루션 제안:</span><br>${aiData.prescription}</div></div>`;
     } catch (error) {
+        clearInterval(loadingInterval); // 에러 났을 때 게이지 멈춤
         console.error("AI 엔진 마스터 디버깅 에러:", error);
         resultContainer.innerHTML = `<div class="report-card" style="border-color:#ff453a;"><p style="text-align:center; color:#ff453a; font-size:13px;">🚨 연산 실패. 다시 시도해 주세요.</p></div>`;
     }

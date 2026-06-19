@@ -24,6 +24,13 @@ const ai = new GoogleGenAI({ apiKey: apiKey });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const express = require('express');
+const cors = require('cors'); // 👈 [추가 1] 파일 맨 위쪽 쯤에 이 줄을 추가하세요!
+// (나머지 const 모듈들...)
+
+const app = express();
+
+app.use(cors()); // 👈 [추가 2] 방금 찾으신 두 줄 바로 위에 추가하세요!
 app.use(express.json());
 app.use(express.static(__dirname));
 
